@@ -119,6 +119,30 @@ def add_rating_column(df, rating_column: str = 'stars', target_column: str = 'ra
     return df
 
 
+def encode_labels(y_train, y_test):
+    """
+    Encode des labels string en entiers avec LabelEncoder.
+    Utile pour PyTorch qui nécessite des labels numériques.
+
+    Args:
+        y_train: pd.Series de labels d'entraînement
+        y_test: pd.Series de labels de test
+
+    Returns:
+        tuple: (y_train_encoded, y_test_encoded, label_encoder)
+            - y_train_encoded: pd.Series d'entiers (même index que y_train)
+            - y_test_encoded: pd.Series d'entiers (même index que y_test)
+            - label_encoder: LabelEncoder fitté (pour .classes_ et .inverse_transform)
+    """
+    from sklearn.preprocessing import LabelEncoder
+
+    le = LabelEncoder()
+    le.fit(y_train)
+    y_train_enc = pd.Series(le.transform(y_train), index=y_train.index)
+    y_test_enc = pd.Series(le.transform(y_test), index=y_test.index)
+    return y_train_enc, y_test_enc, le
+
+
 def remove_short_reviews(df, text_column: str = 'text', min_words: int = 10):
     """
     Supprime les reviews trop courtes.
@@ -164,23 +188,17 @@ def preprocess_dataframe(df: pd.DataFrame,
     Returns:
         DataFrame: Le DataFrame prétraité.
     """
-    # Copie pour ne pas modifier l'original
     df = df.copy()
     
-    # Supprimer les NaN
     df = df.dropna(subset=[text_column, rating_column])
     
-    # Nettoyer le texte
     df['text_clean'] = df[text_column].apply(lambda x: clean_text(x, lowercase=lowercase, remove_punctuation=remove_punctuation, remove_numbers=remove_numbers))
 
-    # Tronquer si demandé
     if truncate:
         df['text_clean'] = df['text_clean'].apply(lambda x: truncate_review(x, max_words))
     
-    # Supprimer les reviews trop courtes
     df = remove_short_reviews(df, text_column='text_clean', min_words=min_words)
     
-    # Ajouter les labels
     if add_polarity:
         df = add_polarity_column(df, rating_column=rating_column)
     

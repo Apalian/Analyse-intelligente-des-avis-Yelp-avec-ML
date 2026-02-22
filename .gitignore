@@ -2,3 +2,5 @@ data/
 figures/
 *.pdf
 *.zip
+models/
+results/
