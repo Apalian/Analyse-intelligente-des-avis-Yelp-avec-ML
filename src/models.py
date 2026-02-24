@@ -7,7 +7,7 @@ class MLP(nn.Module):
     Multi-Layer Perceptron pour la classification de texte.
 
     Architecture :
-        Input -> [FC -> BatchNorm -> ReLU -> Dropout] x N -> FC(n_classes)
+        Input -> [Linear -> BatchNorm -> ReLU -> Dropout] x N -> FC(n_classes)
 
     Ameliorations :
         - Initialisation Kaiming pour les couches lineaires
@@ -50,9 +50,6 @@ class TextCNN(nn.Module):
     Architecture :
         Embedding -> Conv1D (multi-filtres) + BatchNorm -> MaxPool -> FC -> Output
 
-    Ameliorations :
-        - BatchNorm apres chaque convolution pour stabiliser l'entrainement
-        - Embedding plus large et plus de filtres
     """
     def __init__(self, vocab_size, embed_dim, n_classes,
                  n_filters=128, filter_sizes=(3, 4, 5), dropout=0.4):
